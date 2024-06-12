@@ -37,7 +37,9 @@ module Obsidian
       return unless subdirs.any?
 
       selected_subdirs = choose_subdirs(current_dir, subdirs)
+      puts "selected_subdirs: #{selected_subdirs}"
       selected_subdirs.each do |subdir|
+        puts 'in the loop'
         subdir_path = File.join(current_dir, subdir)
         all_selected_dirs << subdir_path
         process_subdirs(subdir_path, all_selected_dirs)

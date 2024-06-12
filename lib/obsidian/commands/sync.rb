@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'obsidian'
+require_relative '../../category_utils'
 require_relative '../../directory_utils'
 require_relative '../../discourse_category_fetcher'
 
@@ -8,18 +9,15 @@ module Obsidian
   module Commands
     class Sync < Obsidian::Command
       def call(_args, _name)
-        selected_dirs = []
-        discourse_categories = nil
+        selected_dirs = nil
         CLI::UI::Frame.open('Select Directories') do
           dir = DirectoryUtils.vault_dir
           selected_dirs = DirectoryUtils.select_subdirs(dir)
         end
 
-        CLI::UI::Frame.open('Fetching Discourse Categories') do
-          @category_fetcher = DiscourseCategoryFetcher.instance
-          @categories = @category_fetcher.categories
-          @category_names = @category_fetcher.category_names
-          puts "category_names: #{@category_names}"
+        categories, category_names = nil
+        CLI::UI::Frame.open('Fetching Discourse categories') do
+          categories, category_names = CategoryUtils.category_loader
         end
       rescue StandardError => e
         rescue_from_error(e)

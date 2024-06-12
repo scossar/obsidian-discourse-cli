@@ -2,8 +2,6 @@
 
 require 'dotenv'
 require 'faraday'
-require 'fileutils'
-require 'mime-types'
 require 'yaml'
 
 require_relative 'api_error_handler'
