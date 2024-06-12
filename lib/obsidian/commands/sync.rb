@@ -8,6 +8,8 @@ module Obsidian
     class Sync < Obsidian::Command
       def call(_args, _name)
         dir = DirectoryUtils.vault_dir
+        selected_dirs = DirectoryUtils.sync_subdirs(dir)
+        puts "selected_dirs: #{selected_dirs}"
       rescue StandardError => e
         rescue_from_error(e)
       end
