@@ -26,22 +26,30 @@ module Obsidian
       end
     end
 
-    def self.sync_subdirs(dir)
+    def self.select_subdirs(dir)
       expanded_dir = File.expand_path(dir)
-      subdirs = Dir.entries(expanded_dir).select do |entry|
-        File.directory?(File.join(expanded_dir, entry)) && !['.', '..'].include?(entry)
-      end
+      subdirs = find_subdirs(expanded_dir)
 
       if subdirs.any?
-        question = "Select any subdirectories of #{dir} that you would also like to sync"
-        selected_subdirs = CLI::UI::Prompt.ask(question, options: subdirs, allow_empty: true,
-                                                         multiple: true)
-
-        selected_paths = selected_subdirs.map { |subdir| File.join(expanded_dir, subdir) }
-        [expanded_dir] + selected_paths
+        choose_subdirs(dir, expanded_dir, subdirs)
       else
         [expanded_dir]
       end
+    end
+
+    def self.find_subdirs(expanded_dir)
+      Dir.entries(expanded_dir).select do |entry|
+        File.directory?(File.join(expanded_dir, entry)) && !['.', '..'].include?(entry)
+      end
+    end
+
+    def self.choose_subdirs(dir, expanded_dir, subdirs)
+      question = "Select any subdirectories of #{dir} that you would also like to sync"
+      selected_subdirs = CLI::UI::Prompt.ask(question, options: subdirs, allow_empty: true,
+                                                       multiple: true)
+
+      selected_paths = selected_subdirs.map { |subdir| File.join(expanded_dir, subdir) }
+      [expanded_dir] + selected_paths
     end
 
     def self.user_error(message)
