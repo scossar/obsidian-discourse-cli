@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'cli/ui'
 require 'cli/kit'
 
@@ -5,7 +7,7 @@ CLI::UI::StdoutRouter.enable
 
 module Obsidian
   TOOL_NAME = 'obsidian'
-  ROOT      = File.expand_path('../..', __FILE__)
+  ROOT      = File.expand_path('..', __dir__)
   LOG_FILE  = '/tmp/obsidian.log'
 
   autoload(:EntryPoint, 'obsidian/entry_point')

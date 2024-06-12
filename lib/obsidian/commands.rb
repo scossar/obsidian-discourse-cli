@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'obsidian'
 
 module Obsidian
@@ -6,7 +8,7 @@ module Obsidian
 
     def self.register(const, cmd, path)
       autoload(const, path)
-      Registry.add(->() { const_get(const) }, cmd)
+      Registry.add(-> { const_get(const) }, cmd)
     end
 
     register :Example, 'example', 'obsidian/commands/example'
