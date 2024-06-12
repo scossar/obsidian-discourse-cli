@@ -15,11 +15,11 @@ module Obsidian
 
         expanded_answer = File.expand_path(answer)
         unless File.directory?(expanded_answer)
-          user_error("The directory '#{answer}' does not exist. Please try again.")
+          user_error("The directory {{red:#{answer}}} does not exist. Please try again.")
           next
         end
 
-        confirm = CLI::UI::Prompt.confirm("Is '#{answer}' correct?")
+        confirm = CLI::UI::Prompt.confirm("Is {{green:#{answer}}} correct?")
         return answer if confirm
       end
     end
@@ -52,13 +52,13 @@ module Obsidian
     end
 
     def self.choose_subdirs(dir, subdirs)
-      question = "Select any subdirectories of #{dir} that you would also like to sync"
+      question = "Select any subdirectories of {{green:#{dir}}} that you would also like to sync"
       CLI::UI::Prompt.ask(question, options: subdirs, allow_empty: true, multiple: true)
     end
 
     def self.user_error(message)
       CLI::UI::Frame.open('Error') do
-        puts message
+        puts CLI::UI.fmt message
       end
     end
   end
