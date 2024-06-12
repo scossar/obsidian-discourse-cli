@@ -53,7 +53,8 @@ module Obsidian
 
     def self.choose_subdirs(dir, subdirs)
       dir_name = File.basename(dir)
-      question = "Select any subdirectories of {{green:#{dir_name}}} that you would also like to sync \n"
+      question = "Select any subdirectories of {{green:#{dir_name}}} that you would also like " \
+                 "to sync \n"
       CLI::UI::Prompt.ask(question, options: subdirs, allow_empty: true, multiple: true)
     end
 
