@@ -73,6 +73,8 @@ module Obsidian
       rescue_error(e, 'ssl_error')
     rescue Faraday::Error => e
       rescue_error(e, 'unknown_error')
+    ensure
+      sleep 1
     end
 
     def handle_error(response)
