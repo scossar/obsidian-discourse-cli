@@ -20,36 +20,40 @@ module Obsidian
         end
 
         confirm = CLI::UI::Prompt.confirm("Is '#{answer}' correct?")
-        # NOTE: I think the rest of the code can work with the unexpanded answer
-        # return [answer, expanded_answer] if it causes issues
         return answer if confirm
       end
     end
 
     def self.select_subdirs(dir)
       expanded_dir = File.expand_path(dir)
-      subdirs = find_subdirs(expanded_dir)
+      all_selected_dirs = [expanded_dir]
+      process_subdirs(expanded_dir, all_selected_dirs)
+      all_selected_dirs
+    end
 
-      if subdirs.any?
-        choose_subdirs(dir, expanded_dir, subdirs)
-      else
-        [expanded_dir]
+    def self.process_subdirs(current_dir, all_selected_dirs)
+      subdirs = find_subdirs(current_dir)
+
+      return unless subdirs.any?
+
+      selected_subdirs = choose_subdirs(current_dir, subdirs)
+      selected_subdirs.each do |subdir|
+        subdir_path = File.join(current_dir, subdir)
+        all_selected_dirs << subdir_path
+        process_subdirs(subdir_path, all_selected_dirs)
       end
     end
 
     def self.find_subdirs(expanded_dir)
       Dir.entries(expanded_dir).select do |entry|
-        File.directory?(File.join(expanded_dir, entry)) && !['.', '..'].include?(entry)
+        File.directory?(File.join(expanded_dir,
+                                  entry)) && !['.', '..'].include?(entry) && !entry.start_with?('.')
       end
     end
 
-    def self.choose_subdirs(dir, expanded_dir, subdirs)
+    def self.choose_subdirs(dir, subdirs)
       question = "Select any subdirectories of #{dir} that you would also like to sync"
-      selected_subdirs = CLI::UI::Prompt.ask(question, options: subdirs, allow_empty: true,
-                                                       multiple: true)
-
-      selected_paths = selected_subdirs.map { |subdir| File.join(expanded_dir, subdir) }
-      [expanded_dir] + selected_paths
+      CLI::UI::Prompt.ask(question, options: subdirs, allow_empty: true, multiple: true)
     end
 
     def self.user_error(message)
