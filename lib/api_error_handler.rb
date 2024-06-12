@@ -14,7 +14,7 @@ module Obsidian
         puts 'The file provided does not have a .md extension.'
         exit
       else
-        prompt_to_continue
+        puts 'this needs to be handled'
       end
     end
   end

@@ -2,9 +2,13 @@
 
 require 'dotenv'
 require 'faraday'
+require 'fileutils'
+require 'mime-types'
 require 'yaml'
 
 require_relative 'api_error_handler'
+
+Dotenv.load
 
 module Obsidian
   class FaradayClient
@@ -47,12 +51,14 @@ module Obsidian
 
     private
 
+    # TODO: options commented out due to the options no longer being
+    # registered on Faraday::Response (gem update issue?  )
     def connection
       @connection ||=
         Faraday.new connection_options do |conn|
-          conn.request :multipart
+          #  conn.request :multipart
           conn.request :url_encoded
-          conn.response :follow_redirects, limit: 5
+          # conn.response :follow_redirects, limit: 5
           conn.response :json, content_type: 'application/json'
           conn.adapter Faraday.default_adapter
           conn.headers['Api-Key'] = @api_key
