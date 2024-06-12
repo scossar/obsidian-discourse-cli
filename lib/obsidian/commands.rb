@@ -13,5 +13,6 @@ module Obsidian
 
     register :Example, 'example', 'obsidian/commands/example'
     register :Help,    'help',    'obsidian/commands/help'
+    register :Sync, 'sync', 'obsidian/commands/sync'
   end
 end
