@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative 'models/discourse_category'
+require_relative 'models/directory'
 
 module Obsidian
   module DirectoryUtils
@@ -50,7 +50,8 @@ module Obsidian
     def self.find_subdirs(expanded_dir)
       Dir.entries(expanded_dir).select do |entry|
         File.directory?(File.join(expanded_dir,
-                                  entry)) && !['.', '..'].include?(entry) && !entry.start_with?('.')
+                                  entry)) && !['.',
+                                               '..'].include?(entry) && !entry.start_with?('.')
       end
     end
 
