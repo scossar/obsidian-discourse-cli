@@ -51,8 +51,6 @@ module Obsidian
 
     private
 
-    # TODO: options commented out due to the options no longer being
-    # registered on Faraday::Response (gem update issue?  )
     def connection
       @connection ||=
         Faraday.new connection_options do |conn|
