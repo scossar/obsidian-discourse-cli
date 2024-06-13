@@ -11,8 +11,7 @@ module Obsidian
       Registry.add(-> { const_get(const) }, cmd)
     end
 
-    register :Example, 'example', 'obsidian/commands/example'
-    register :Help,    'help',    'obsidian/commands/help'
+    register :Help, 'help', 'obsidian/commands/help'
     register :Sync, 'sync', 'obsidian/commands/sync'
   end
 end
