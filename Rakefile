@@ -21,11 +21,18 @@ namespace :db do
 
   desc 'Create a new migration'
   task :create_migration, [:name] do |_t, args|
+    unless args[:name]
+      puts 'Usage: rake db:create_migration [create_notes]'
+      exit 1
+    end
+
     timestamp = Time.now.utc.strftime('%Y%m%d%H%M%S')
-    name = args[:name] || 'migration'
-    filename = "db/migrate/#{timestamp}_#{name}.rb"
+    name = args[:name]
+    filename = "db/migrate/#{timestamp}_#{name.underscore}.rb"
+    migration_class_name = name.camelize
+
     File.write(filename, <<~FILE)
-      class #{name.camelize} < ActiveRecord::Migration[6.1]
+      class #{migration_class_name} < ActiveRecord::Migration[6.1]
         def change
         end
       end
