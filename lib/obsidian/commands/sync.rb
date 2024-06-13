@@ -4,6 +4,7 @@ require 'obsidian'
 require_relative '../../category_utils'
 require_relative '../../directory_utils'
 require_relative '../../discourse_category_fetcher'
+require_relative '../../publish_to_discourse'
 
 module Obsidian
   module Commands
@@ -18,6 +19,16 @@ module Obsidian
         categories, category_names = nil
         CLI::UI::Frame.open('Fetching Discourse categories') do
           categories, category_names = CategoryUtils.category_loader
+        end
+
+        CLI::UI::Frame.open('Sync with Discourse') do
+          publisher = PublishToDiscourse.new
+          selected_dirs.each do |dir|
+            Dir.glob(File.join(dir, '*.md')).each do |file_path|
+              puts "syncing file: #{file_path}"
+              publisher.publish(file_path, 8)
+            end
+          end
         end
       rescue StandardError => e
         rescue_from_error(e)
