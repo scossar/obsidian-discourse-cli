@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative 'models/discourse_category'
+
 module Obsidian
   module DirectoryUtils
     def self.vault_dir
@@ -27,7 +29,8 @@ module Obsidian
     def self.select_subdirs(dir)
       expanded_dir = File.expand_path(dir)
       all_selected_dirs = [expanded_dir]
-      process_subdirs(expanded_dir, all_selected_dirs)
+      all_selected_dirs = process_subdirs(expanded_dir, all_selected_dirs)
+      puts all_selected_dirs
       all_selected_dirs
     end
 

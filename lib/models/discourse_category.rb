@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative '../discourse_request'
+
 module Obsidian
   class DiscourseCategory < ActiveRecord::Base
     has_many :directories
