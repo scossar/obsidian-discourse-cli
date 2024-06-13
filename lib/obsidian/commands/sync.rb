@@ -26,7 +26,7 @@ module Obsidian
           selected_dirs.each do |dir|
             Dir.glob(File.join(dir, '*.md')).each do |file_path|
               puts "syncing file: #{file_path}"
-              publisher.publish(file_path, 8)
+              # publisher.publish(file_path, 8)
             end
           end
         end

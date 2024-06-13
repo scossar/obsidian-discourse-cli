@@ -6,5 +6,11 @@ module Obsidian
     has_many :notes
 
     validates :path, presence: true, uniqueness: true
+
+    def self.ensure_directories_exist(paths)
+      paths.each do |path|
+        find_or_create_by(path:)
+      end
+    end
   end
 end

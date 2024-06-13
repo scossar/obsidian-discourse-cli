@@ -30,21 +30,25 @@ module Obsidian
       expanded_dir = File.expand_path(dir)
       all_selected_dirs = [expanded_dir]
       all_selected_dirs = process_subdirs(expanded_dir, all_selected_dirs)
-      puts all_selected_dirs
+      Directory.ensure_directories_exist(all_selected_dirs)
       all_selected_dirs
     end
 
     def self.process_subdirs(current_dir, all_selected_dirs)
       subdirs = find_subdirs(current_dir)
 
-      return unless subdirs.any?
+      return all_selected_dirs unless subdirs.any?
 
       selected_subdirs = choose_subdirs(current_dir, subdirs)
+      return all_selected_dirs unless selected_subdirs.any?
+
       selected_subdirs.each do |subdir|
         subdir_path = File.join(current_dir, subdir)
         all_selected_dirs << subdir_path
         process_subdirs(subdir_path, all_selected_dirs)
       end
+
+      all_selected_dirs
     end
 
     def self.find_subdirs(expanded_dir)
