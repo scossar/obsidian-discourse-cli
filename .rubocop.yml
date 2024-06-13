@@ -9,6 +9,8 @@ AllCops:
     - "vendor/**/*"
     - "exe/**/*"
     - "bin/**/*"
+    - "db/**/*"
+    - "Rakefile"
 
 Style/Documentation:
   Enabled: false

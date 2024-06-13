@@ -10,7 +10,7 @@ module Obsidian
     def initialize(markdown)
       @markdown = markdown
       @image_tag_regex = /!\[\[(.*?)\]\]/
-      config = YAML.load_file('config.yml')
+      config = YAML.load_file('config/config.yml')
       @uploads_dir = config['uploads_dir']
     end
 

@@ -15,7 +15,7 @@ module Obsidian
     DEFAULT_TIMEOUT = 30
 
     def initialize
-      config = YAML.load_file('config.yml')
+      config = YAML.load_file('config/config.yml')
       @api_username = config['api_username']
       @base_url = config['base_url']
       @api_key = ENV.fetch('API_KEY')
