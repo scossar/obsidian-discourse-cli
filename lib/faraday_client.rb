@@ -2,6 +2,8 @@
 
 require 'dotenv'
 require 'faraday'
+require 'faraday/follow_redirects'
+require 'faraday/multipart'
 require 'yaml'
 
 require_relative 'api_error_handler'
@@ -54,9 +56,9 @@ module Obsidian
     def connection
       @connection ||=
         Faraday.new connection_options do |conn|
-          #  conn.request :multipart
+          conn.request :multipart
           conn.request :url_encoded
-          # conn.response :follow_redirects, limit: 5
+          conn.response :follow_redirects, limit: 5
           conn.response :json, content_type: 'application/json'
           conn.adapter Faraday.default_adapter
           conn.headers['Api-Key'] = @api_key

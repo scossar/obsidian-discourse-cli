@@ -4,6 +4,7 @@ require 'front_matter_parser'
 
 require_relative 'api_error_handler'
 require_relative 'discourse_request'
+require_relative 'file_handler'
 require_relative 'file_utils'
 
 module Obsidian
@@ -23,8 +24,8 @@ module Obsidian
       # post_id = Database.get_discourse_post_id(title)
       post_id = nil
       markdown, _front_matter = parse(content)
-      #  file_handler = FileHandler.new(markdown)
-      #  markdown = file_handler.convert
+      file_handler = FileHandler.new(markdown)
+      markdown = file_handler.convert
       #  link_handler = LinkHandler.new(markdown)
       #  markdown = link_handler.handle
       if post_id

@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'faraday'
+require 'faraday/multipart'
 require 'mime-types'
 
 require_relative 'faraday_client'
