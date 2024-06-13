@@ -65,6 +65,11 @@ module Obsidian
       CLI::UI::Prompt.ask(question, options: subdirs, allow_empty: true, multiple: true)
     end
 
+    # NOTE: I'm keeping this here as a reference
+    def self.quote_path(path)
+      "\"#{path}\""
+    end
+
     def self.user_error(message)
       CLI::UI::Frame.open('Error') do
         puts CLI::UI.fmt message
