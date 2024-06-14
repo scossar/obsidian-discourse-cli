@@ -12,7 +12,32 @@ module Obsidian
       def call(_args, _name)
         selected_dirs = directory_frames
         category_frames(selected_dirs)
+        publishing_frames(selected_dirs)
+      rescue StandardError => e
+        rescue_from_error(e)
+      end
 
+      def self.help
+        "This will be the help text for #{Obsidian::TOOL_NAME}"
+      end
+
+      def publishing_frames(selected_dirs)
+        CLI::UI::Frame.open('Publish to Discourse') do
+          selected_dirs.each do |dir|
+            publish_dir(dir)
+          end
+        end
+      end
+
+      def publish_dir(dir)
+        CLI::UI::Frame.open("Publishing {{green:#{dir}}}") do
+          Dir.glob(File.join(dir, '*.md')).each do |file_path|
+            puts file_path
+          end
+        end
+      end
+
+      def bak
         CLI::UI::Frame.open('Sync with Discourse') do
           # publisher = PublishToDiscourse.new
           selected_dirs.each do |dir|
@@ -22,12 +47,6 @@ module Obsidian
             end
           end
         end
-      rescue StandardError => e
-        rescue_from_error(e)
-      end
-
-      def self.help
-        "This will be the help text for #{Obsidian::TOOL_NAME}"
       end
 
       def directory_frames
