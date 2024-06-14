@@ -1,19 +1,24 @@
 # frozen_string_literal: true
 
 require 'front_matter_parser'
+require 'yaml'
 
 require_relative 'api_error_handler'
 require_relative 'discourse_request'
 require_relative 'file_handler'
 require_relative 'file_utils'
+require_relative 'models/discourse_topic'
+require_relative 'models/note'
 
 module Obsidian
   class PublishToDiscourse
     def initialize
       @client = DiscourseRequest.new
+      config = YAML.load_file('config/config.yml')
+      @base_url = config['base_url']
     end
 
-    def publish(file_path, category_id)
+    def publish(file_path:, directory:)
       begin
         title = FileUtils.title_from_file_path(file_path)
       rescue ArgumentError => e
@@ -29,9 +34,9 @@ module Obsidian
       #  link_handler = LinkHandler.new(markdown)
       #  markdown = link_handler.handle
       if post_id
-        update_topic_from_note(title:, markdown:, post_id:)
+        update_topic_from_note(markdown:, post_id:)
       else
-        create_topic(title:, markdown:, category: category_id)
+        create_topic(title:, markdown:, directory:)
       end
     end
 
@@ -42,14 +47,18 @@ module Obsidian
       [markdown, front_matter]
     end
 
-    def create_topic(title:, markdown:, category:)
-      puts "Creating full topic for '#{title}'"
-      @client.create_topic(title:, markdown:, category:)
-      #  add_note_to_db(title, response)
+    # TODO: this needs error handling to prevent duplicate note creation
+    def create_topic(title:, markdown:, directory:)
+      category = directory.discourse_category.discourse_id
+      response = @client.create_topic(title:, markdown:, category:)
+      note = Note.create(title:, directory:)
+      discourse_url = "#{@base_url}/t/#{response['topic_slug']}/#{response['topic_id']}"
+      discourse_id = response['topic_id']
+      discourse_post_id = response['id']
+      DiscourseTopic.create(discourse_url:, discourse_id:, discourse_post_id:, note:)
     end
 
-    def update_topic_from_note(title:, markdown:, post_id:)
-      puts "Updating post for '#{title}', post_id: #{post_id}"
+    def update_topic_from_note(markdown:, post_id:)
       @client.update_post(markdown:, post_id:)
     end
   end
