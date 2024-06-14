@@ -26,8 +26,8 @@ module Obsidian
         return
       end
       content = File.read(file_path)
-      # post_id = Database.get_discourse_post_id(title)
-      post_id = nil
+      note = Note.find_by(title:)
+      post_id = note&.discourse_topic&.discourse_post_id
       markdown, _front_matter = parse(content)
       file_handler = FileHandler.new(markdown)
       markdown = file_handler.convert
@@ -47,19 +47,58 @@ module Obsidian
       [markdown, front_matter]
     end
 
-    # TODO: this needs error handling to prevent duplicate note creation
     def create_topic(title:, markdown:, directory:)
-      category = directory.discourse_category.discourse_id
-      response = @client.create_topic(title:, markdown:, category:)
-      note = Note.create(title:, directory:)
-      discourse_url = "#{@base_url}/t/#{response['topic_slug']}/#{response['topic_id']}"
-      discourse_id = response['topic_id']
-      discourse_post_id = response['id']
-      DiscourseTopic.create(discourse_url:, discourse_id:, discourse_post_id:, note:)
+      category_id = fetch_category_id(directory)
+      return unless category_id
+
+      response = create_discourse_topic(title, markdown, category_id)
+      return unless response
+
+      note = create_note(title, directory)
+      return unless note
+
+      create_discourse_topic_entry(response, note)
     end
 
     def update_topic_from_note(markdown:, post_id:)
       @client.update_post(markdown:, post_id:)
+    end
+
+    private
+
+    def fetch_category_id(directory)
+      directory.discourse_category&.discourse_id.tap do |category_id|
+        puts "Error: Category ID not found for directory #{directory.path}" unless category_id
+      end
+    end
+
+    def create_discourse_topic(title, markdown, category_id)
+      @client.create_topic(title:, markdown:, category: category_id)
+    rescue StandardError => e
+      puts "Error creating Discourse topic: #{e.message}"
+      nil
+    end
+
+    def create_note(title, directory)
+      Note.create(title:, directory:).tap do |note|
+        puts 'Error: Note could not be created' unless note.persisted?
+      end
+    rescue StandardError => e
+      puts "Error creating Note: #{e.message}"
+      nil
+    end
+
+    def create_discourse_topic_entry(response, note)
+      discourse_url = "#{@base_url}/t/#{response['topic_slug']}/#{response['topic_id']}"
+      discourse_id = response['topic_id']
+      discourse_post_id = response['id']
+      DiscourseTopic.create(discourse_url:, discourse_id:,
+                            discourse_post_id:, note:).tap do |topic|
+        puts 'Error: DiscourseTopic could not be created' unless topic.persisted?
+      end
+    rescue StandardError => e
+      puts "Error creating DiscourseTopic: #{e.message}"
+      nil
     end
   end
 end
