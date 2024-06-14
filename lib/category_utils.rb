@@ -22,39 +22,39 @@ module Obsidian
       [categories, category_names]
     end
 
-    def self.directory_category(categories:, category_names:, selected_dirs:)
-      current_dir = nil
+    def self.directories_for_categories(categories:, category_names:, selected_dirs:)
       selected_dirs.each do |dir|
-        current_dir = dir
-        loop do
-          answer, confirm = category_for_dir(category_names:, dir:)
-          return answer if confirm
-        end
-
-        category = category_by_name(categories:, name: answer)
-        directory = Directory.find_by(path: current_dir)
-        result = DiscourseCategory.create(discourse_id: category[:id], name: category[:name],
-                                          slug: category[:slug])
-        if result.persisted?
-          directory.update(discourse_category: result)
-          puts CLI::UI.fmt "Directory {{green:#{current_dir}}} is now associated with {{blue:#{category[:name]}}}"
-        else
-          puts 'Failed to create DiscourseCategory'
-        end
+        category_name = select_category_for_dir(category_names:, dir:)
+        update_directory(categories:, category_name:, dir:)
       end
     end
 
-    def self.category_for_dir(category_names:, dir:)
-      answer = CLI::UI::Prompt.ask("Category for {{green:#{dir}}}?", options: category_names)
-      confirm = CLI::UI::Prompt.confirm("Notes from the {{green:#{dir}}} directory will be " \
-                                        "published to the {{blue:#{answer}}} category.")
+    def self.select_category_for_dir(category_names:, dir:)
+      loop do
+        answer = CLI::UI::Prompt.ask("Category for {{green:#{dir}}}?", options: category_names)
+        confirm = CLI::UI::Prompt.confirm("Notes from the {{green:#{dir}}} directory will be " \
+                                          "published to the {{blue:#{answer}}} category.")
 
-      [answer, confirm]
+        return answer if confirm
+      end
     end
 
-    def self.category_by_name(categories:, name:)
+    def self.update_directory(categories:, category_name:, dir:)
+      category = category_by_name(categories:, category_name:)
+      directory = Directory.find_by(path: dir)
+      result = DiscourseCategory.find_or_create_by(discourse_id: category[:id], name: category_name,
+                                                   slug: category[:slug])
+      if result.persisted?
+        directory.update(discourse_category: result)
+        puts CLI::UI.fmt "Directory {{green:#{dir}}} is now associated with {{blue:#{name}}}"
+      else
+        puts 'Failed to create DiscourseCategory'
+      end
+    end
+
+    def self.category_by_name(categories:, category_name:)
       categories.each_value do |category|
-        return category if category[:name] == name
+        return category if category[:name] == category_name
       end
       nil
     end

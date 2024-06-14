@@ -10,19 +10,8 @@ module Obsidian
   module Commands
     class Sync < Obsidian::Command
       def call(_args, _name)
-        selected_dirs, root_dir = nil
-        CLI::UI::Frame.open('Select Directories') do
-          root_dir = DirectoryUtils.vault_dir
-          selected_dirs = DirectoryUtils.select_subdirs(root_dir)
-        end
-
-        categories, category_names = nil
-        CLI::UI::Frame.open('Fetching Discourse categories') do
-          categories, category_names = CategoryUtils.category_loader
-        end
-        CLI::UI::Frame.open('Directory Categories') do
-          CategoryUtils.directory_category(categories:, category_names:, selected_dirs:)
-        end
+        selected_dirs = directory_frames
+        category_frames(selected_dirs)
 
         CLI::UI::Frame.open('Sync with Discourse') do
           # publisher = PublishToDiscourse.new
@@ -39,6 +28,23 @@ module Obsidian
 
       def self.help
         "This will be the help text for #{Obsidian::TOOL_NAME}"
+      end
+
+      def directory_frames
+        CLI::UI::Frame.open('Select Directories') do
+          root_dir = DirectoryUtils.vault_dir
+          DirectoryUtils.select_subdirs(root_dir)
+        end
+      end
+
+      def category_frames(selected_dirs)
+        categories, category_names = nil
+        CLI::UI::Frame.open('Fetching Discourse categories') do
+          categories, category_names = CategoryUtils.category_loader
+        end
+        CLI::UI::Frame.open('Select directories for categories') do
+          CategoryUtils.directories_for_categories(categories:, category_names:, selected_dirs:)
+        end
       end
 
       private
