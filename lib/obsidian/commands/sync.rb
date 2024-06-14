@@ -33,12 +33,13 @@ module Obsidian
 
       def publish_dir(dir, publisher)
         directory = Directory.find_by(path: dir)
-        discourse_category_id = directory.discourse_category_id
+        discourse_category_id = directory.discourse_category.discourse_id
         CLI::UI::Frame.open("Publishing {{green:#{dir}}}") do
           Dir.glob(File.join(dir, '*.md')).each do |file_path|
             spin_group = CLI::UI::SpinGroup.new
-            spin_group.add("Publishing {{green:#{File.basename(file_path)}}}") do
-              publisher.publish(file_path, discourse_category_id)
+            spin_group.add("Note {{green:#{File.basename(file_path)}}}") do
+              result = publisher.publish(file_path, discourse_category_id)
+              puts "publishing result #{result}"
             end
             spin_group.wait
           end

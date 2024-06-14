@@ -46,7 +46,7 @@ module Obsidian
                                                    slug: category[:slug])
       if result.persisted?
         directory.update(discourse_category: result)
-        puts CLI::UI.fmt "Directory {{green:#{dir}}} is now associated with {{blue:#{name}}}"
+        puts CLI::UI.fmt "Directory {{green:#{dir}}} is now associated with {{blue:#{category_name}}}"
       else
         puts 'Failed to create DiscourseCategory'
       end
