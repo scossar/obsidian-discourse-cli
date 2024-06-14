@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'obsidian'
+require_relative '../../models/directory'
 require_relative '../../category_utils'
 require_relative '../../directory_utils'
 require_relative '../../discourse_category_fetcher'
@@ -22,17 +23,24 @@ module Obsidian
       end
 
       def publishing_frames(selected_dirs)
+        publisher = PublishToDiscourse.new
         CLI::UI::Frame.open('Publish to Discourse') do
           selected_dirs.each do |dir|
-            publish_dir(dir)
+            publish_dir(dir, publisher)
           end
         end
       end
 
-      def publish_dir(dir)
+      def publish_dir(dir, publisher)
+        directory = Directory.find_by(path: dir)
+        discourse_category_id = directory.discourse_category_id
         CLI::UI::Frame.open("Publishing {{green:#{dir}}}") do
           Dir.glob(File.join(dir, '*.md')).each do |file_path|
-            puts file_path
+            spin_group = CLI::UI::SpinGroup.new
+            spin_group.add("Publishing {{green:#{File.basename(file_path)}}}") do
+              publisher.publish(file_path, discourse_category_id)
+            end
+            spin_group.wait
           end
         end
       end
