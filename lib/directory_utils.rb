@@ -6,7 +6,7 @@ module Obsidian
   module DirectoryUtils
     def self.vault_dir
       loop do
-        answer = CLI::UI::Prompt.ask("Vault root directory (enter 'q' to quit)",
+        answer = CLI::UI::Prompt.ask("Directory to sync (enter 'q' to quit)",
                                      is_file: true).strip
         exit if answer.downcase == 'q'
 

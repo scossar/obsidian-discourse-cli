@@ -7,6 +7,7 @@ require_relative 'discourse_request'
 require_relative 'errors'
 require_relative 'file_handler'
 require_relative 'file_utils'
+require_relative 'link_handler'
 require_relative 'models/discourse_topic'
 require_relative 'models/note'
 
