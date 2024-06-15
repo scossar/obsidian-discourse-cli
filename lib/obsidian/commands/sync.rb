@@ -65,6 +65,7 @@ module Obsidian
         CLI::UI::Frame.open('Fetching Discourse categories') do
           categories, category_names = CategoryUtils.category_loader
         end
+        exit unless categories
         CLI::UI::Frame.open('Select directories for categories') do
           CategoryUtils.directories_for_categories(categories:, category_names:, selected_dirs:)
         end
