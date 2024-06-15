@@ -29,9 +29,13 @@ module Obsidian
 
     def self.directories_for_categories(categories:, category_names:, selected_dirs:)
       selected_dirs.each do |dir|
-        CliKitUtils.debug("Iterating through dirs: #{dir}\n")
-        category_name = select_category_for_dir(category_names:, dir:)
-        update_directory(categories:, category_name:, dir:)
+        discourse_category = Directory.find_by(path: dir)&.discourse_category
+        if discourse_category
+          puts discourse_category.name
+        else
+          category_name = select_category_for_dir(category_names:, dir:)
+          update_directory(categories:, category_name:, dir:)
+        end
       end
     end
 
