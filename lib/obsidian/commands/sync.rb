@@ -41,7 +41,7 @@ module Obsidian
             spin_group = CLI::UI::SpinGroup.new
 
             spin_group.failure_debrief do |_title, exception|
-              puts CLI::UI.fmt "{{x}} #{exception}"
+              puts CLI::UI.fmt "  #{exception}"
             end
 
             spin_group.add("Note {{green:#{File.basename(file_path)}}}") do

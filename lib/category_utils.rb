@@ -9,6 +9,10 @@ module Obsidian
     def self.category_loader
       spin_group = CLI::UI::SpinGroup.new
 
+      spin_group.failure_debrief do |_title, exception|
+        puts CLI::UI.fmt "  #{exception}"
+      end
+
       categories, category_names = nil
       spin_group.add('Fetching Categories') do
         category_fetcher = DiscourseCategoryFetcher.instance
