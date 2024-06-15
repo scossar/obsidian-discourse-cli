@@ -5,6 +5,7 @@ require 'yaml'
 
 require_relative 'api_error_handler'
 require_relative 'discourse_request'
+require_relative 'errors'
 require_relative 'file_handler'
 require_relative 'file_utils'
 require_relative 'models/discourse_topic'
@@ -67,8 +68,8 @@ module Obsidian
     private
 
     def fetch_category_id(directory)
-      directory.discourse_category&.discourse_id.tap do |category_id|
-        puts "Error: Category ID not found for directory #{directory.path}" unless category_id
+      directory.discourse_category&.discourse_id.tap do |_category_id|
+        raise Obsidian::Errors::BaseError.new('category Id not found') # unless category_id
       end
     end
 

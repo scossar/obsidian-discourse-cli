@@ -5,6 +5,7 @@ require_relative '../../models/directory'
 require_relative '../../category_utils'
 require_relative '../../directory_utils'
 require_relative '../../discourse_category_fetcher'
+require_relative '../../errors'
 require_relative '../../publish_to_discourse'
 
 module Obsidian
@@ -14,6 +15,8 @@ module Obsidian
         selected_dirs = directory_frames
         category_frames(selected_dirs)
         publishing_frames(selected_dirs)
+      rescue Obsidian::Errors::BaseError => e
+        rescue_custom_error(e)
       rescue StandardError => e
         rescue_from_error(e)
       end
@@ -45,18 +48,6 @@ module Obsidian
         end
       end
 
-      def bak
-        CLI::UI::Frame.open('Sync with Discourse') do
-          # publisher = PublishToDiscourse.new
-          selected_dirs.each do |dir|
-            Dir.glob(File.join(dir, '*.md')).each do |file_path|
-              # puts "syncing file: #{file_path}"
-              # publisher.publish(file_path, 8)
-            end
-          end
-        end
-      end
-
       def directory_frames
         CLI::UI::Frame.open('Select Directories') do
           root_dir = DirectoryUtils.vault_dir
@@ -75,6 +66,12 @@ module Obsidian
       end
 
       private
+
+      def rescue_custom_error(error)
+        CLI::UI::Frame.open('Custom Error') do
+          puts "An application error occurred: #{error.message}"
+        end
+      end
 
       def rescue_from_error(error)
         CLI::UI::Frame.open('Error') do
