@@ -68,8 +68,8 @@ module Obsidian
     private
 
     def fetch_category_id(directory)
-      directory.discourse_category&.discourse_id.tap do |_category_id|
-        raise Obsidian::Errors::BaseError.new('category Id not found') # unless category_id
+      directory.discourse_category&.discourse_id.tap do |category_id|
+        raise Obsidian::Errors::BaseError.new('category Id not found') unless category_id
       end
     end
 

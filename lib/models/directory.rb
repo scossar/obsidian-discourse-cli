@@ -3,7 +3,7 @@
 module Obsidian
   class Directory < ActiveRecord::Base
     belongs_to :discourse_category, optional: true
-    has_many :notes
+    has_many :notes, dependent: :destroy
 
     validates :path, presence: true, uniqueness: true
 

@@ -39,10 +39,15 @@ module Obsidian
         CLI::UI::Frame.open("Publishing {{green:#{dir}}}") do
           Dir.glob(File.join(dir, '*.md')).each do |file_path|
             spin_group = CLI::UI::SpinGroup.new
-            spin_group.add("Note {{green:#{File.basename(file_path)}}}") do
-              result = publisher.publish(file_path:, directory:)
-              puts "result #{result}"
+
+            spin_group.failure_debrief do |_title, exception|
+              puts CLI::UI.fmt "{{x}} #{exception}"
             end
+
+            spin_group.add("Note {{green:#{File.basename(file_path)}}}") do
+              publisher.publish(file_path:, directory:)
+            end
+
             spin_group.wait
           end
         end
