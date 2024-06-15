@@ -2,7 +2,7 @@
 
 require 'yaml'
 
-require_relative 'api_error_handler'
+require_relative 'errors'
 require_relative 'discourse_request'
 
 module Obsidian
@@ -24,9 +24,8 @@ module Obsidian
         new_tag = "![#{original_filename}](#{short_url})"
         new_tag
       rescue StandardError => e
-        ApiErrorHandler.handle_error("Error processing upload #{tag_match}: #{e.message}",
-                                     'ProcessingError')
-        tag_match
+        raise Obsidian::Errors::BaseError,
+              "Error processing upload for #{tag_match}: #{e.message}"
       end
     end
 
