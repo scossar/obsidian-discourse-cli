@@ -32,7 +32,7 @@ module Obsidian
       link_handler = LinkHandler.new(markdown, directory)
       markdown = link_handler.handle
       if post_id
-        update_topic_from_note(markdown:, post_id:)
+        update_post_from_note(markdown:, post_id:)
       else
         create_topic(title:, markdown:, directory:)
       end
@@ -54,7 +54,7 @@ module Obsidian
       create_discourse_topic_entry(response, note)
     end
 
-    def update_topic_from_note(markdown:, post_id:)
+    def update_post_from_note(markdown:, post_id:)
       @client.update_post(markdown:, post_id:).tap do |response|
         raise Obsidian::Errors::BaseError, "Failed to update post_id: #{post_id}" unless response
       end

@@ -25,34 +25,6 @@ module Obsidian
         "This will be the help text for #{Obsidian::TOOL_NAME}"
       end
 
-      def publishing_frames(selected_dirs)
-        publisher = PublishToDiscourse.new
-        CLI::UI::Frame.open('Publish to Discourse') do
-          selected_dirs.each do |dir|
-            publish_dir(dir, publisher)
-          end
-        end
-      end
-
-      def publish_dir(dir, publisher)
-        directory = Directory.find_by(path: dir)
-        CLI::UI::Frame.open("Publishing notes from {{green:#{dir}}}") do
-          Dir.glob(File.join(dir, '*.md')).each do |file_path|
-            spin_group = CLI::UI::SpinGroup.new
-
-            spin_group.failure_debrief do |_title, exception|
-              puts CLI::UI.fmt "  #{exception}"
-            end
-
-            spin_group.add("Note {{green:#{File.basename(file_path)}}}") do
-              publisher.publish(file_path:, directory:)
-            end
-
-            spin_group.wait
-          end
-        end
-      end
-
       def directory_frames
         CLI::UI::Frame.open('Select Directories') do
           root_dir = DirectoryUtils.vault_dir
@@ -68,6 +40,34 @@ module Obsidian
         exit unless categories
         CLI::UI::Frame.open('Select directories for categories') do
           CategoryUtils.directories_for_categories(categories:, category_names:, selected_dirs:)
+        end
+      end
+
+      def publishing_frames(selected_dirs)
+        publisher = PublishToDiscourse.new
+        CLI::UI::Frame.open('Publish to Discourse') do
+          selected_dirs.each do |dir|
+            publish_dir(dir, publisher)
+          end
+        end
+      end
+
+      def publish_dir(dir, _publisher)
+        directory = Directory.find_by(path: dir)
+        CLI::UI::Frame.open("Publishing notes from {{green:#{dir}}}") do
+          Dir.glob(File.join(dir, '*.md')).each do |file_path|
+            spin_group = CLI::UI::SpinGroup.new
+
+            spin_group.failure_debrief do |_title, exception|
+              puts CLI::UI.fmt "  #{exception}"
+            end
+
+            spin_group.add("Note {{green:#{File.basename(file_path)}}}") do
+              # publisher.publish(file_path:, directory:)
+            end
+
+            spin_group.wait
+          end
         end
       end
 

@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require_relative 'cli_kit_utils'
 require_relative 'models/discourse_category'
 require_relative 'models/directory'
 require_relative 'discourse_category_fetcher'
@@ -28,6 +29,7 @@ module Obsidian
 
     def self.directories_for_categories(categories:, category_names:, selected_dirs:)
       selected_dirs.each do |dir|
+        CliKitUtils.debug("Iterating through dirs: #{dir}\n")
         category_name = select_category_for_dir(category_names:, dir:)
         update_directory(categories:, category_name:, dir:)
       end
@@ -36,7 +38,7 @@ module Obsidian
     def self.select_category_for_dir(category_names:, dir:)
       loop do
         answer = CLI::UI::Prompt.ask("Category for {{green:#{dir}}}?", options: category_names)
-        confirm = CLI::UI::Prompt.confirm("Notes from the {{green:#{dir}}} directory will be " \
+        confirm = CLI::UI::Prompt.confirm("  Notes from the {{green:#{dir}}} directory will be " \
                                           "published to the {{blue:#{answer}}} category.")
 
         return answer if confirm
