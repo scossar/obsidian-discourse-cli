@@ -50,14 +50,8 @@ module Obsidian
 
     def create_topic(title:, markdown:, directory:)
       category_id = fetch_category_id(directory)
-      return unless category_id
-
       response = create_discourse_topic(title, markdown, category_id)
-      return unless response
-
       note = create_note(title, directory)
-      return unless note
-
       create_discourse_topic_entry(response, note)
     end
 
@@ -77,19 +71,19 @@ module Obsidian
     end
 
     def create_discourse_topic(title, markdown, category_id)
-      @client.create_topic(title:, markdown:, category: category_id)
+      @client.create_topic(title:, markdown:, category: category_id).tap do |response|
+        raise Obsidian::Errors::BaseError, 'Failed to create Discourse topic' unless response
+      end
     rescue StandardError => e
-      puts "Error creating Discourse topic: #{e.message}"
-      nil
+      raise Obsidian::Errors::BaseError, "Error creating Discourse topic: #{e.message}"
     end
 
     def create_note(title, directory)
       Note.create(title:, directory:).tap do |note|
-        puts 'Error: Note could not be created' unless note.persisted?
+        raise Obsidian::Errors::BaseError, 'Note could not be created' unless note.persisted?
       end
     rescue StandardError => e
-      puts "Error creating Note: #{e.message}"
-      nil
+      raise Obsidian::Errors::BaseError, "Error creating Note: #{e.message}"
     end
 
     def create_discourse_topic_entry(response, note)
@@ -98,11 +92,12 @@ module Obsidian
       discourse_post_id = response['id']
       DiscourseTopic.create(discourse_url:, discourse_id:,
                             discourse_post_id:, note:).tap do |topic|
-        puts 'Error: DiscourseTopic could not be created' unless topic.persisted?
+        unless topic.persisted?
+          raise Obsidian::Errors::BaseError, 'DiscourseTopic could not be created'
+        end
       end
     rescue StandardError => e
-      puts "Error creating DiscourseTopic: #{e.message}"
-      nil
+      raise Obsidian::Errors::BaseError, "Error creating DiscourseTopic: #{e.message}"
     end
   end
 end
