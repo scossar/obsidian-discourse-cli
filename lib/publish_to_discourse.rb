@@ -28,8 +28,8 @@ module Obsidian
       markdown, _front_matter = parse(content)
       file_handler = FileHandler.new(markdown)
       markdown = file_handler.convert
-      #  link_handler = LinkHandler.new(markdown)
-      #  markdown = link_handler.handle
+      link_handler = LinkHandler.new(markdown, directory)
+      markdown = link_handler.handle
       if post_id
         update_topic_from_note(markdown:, post_id:)
       else
