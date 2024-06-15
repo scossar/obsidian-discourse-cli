@@ -6,7 +6,7 @@ require 'faraday/follow_redirects'
 require 'faraday/multipart'
 require 'yaml'
 
-require_relative 'api_error_handler'
+require_relative 'errors'
 
 Dotenv.load
 
@@ -84,40 +84,45 @@ module Obsidian
     def handle_error(response)
       case response.status
       when 403
-        raise_unauthenticated_error
+        raise_unauthenticated_error(response)
       when 404, 410
-        raise_not_found_error
+        raise_not_found_error(response)
       when 422
-        raise_unprocessable_entity
+        raise_unprocessable_entity(response)
       when 429
-        raise_too_many_requests
+        raise_too_many_requests(response)
       when 500...600
-        raise_server_error
+        raise_server_error(response)
       end
     end
 
     def rescue_error(error, error_type)
-      ApiErrorHandler.handle_error(error.message, error_type)
+      raise Obsidian::Errors::BaseError, "#{error_type}: #{error.message}"
     end
 
-    def raise_unauthenticated_error
-      ApiErrorHandler.handle_error('Unauthenticated access', 'invalid_access')
+    def raise_unauthenticated_error(response)
+      raise Obsidian::Errors::BaseError,
+            "#{response.status}: You do not have permission to access that resource"
     end
 
-    def raise_not_found_error
-      ApiErrorHandler.handle_error('Resource not found', 'not_found')
+    def raise_not_found_error(response)
+      raise Obsidian::Errors::BaseError,
+            "#{response.status}: Resource not found"
     end
 
-    def raise_unprocessable_entity
-      ApiErrorHandler.handle_error('Unprocessable entity', 'unprocessable_entity')
+    def raise_unprocessable_entity(response)
+      raise Obsidian::Errors::BaseError,
+            "#{response.status}: Unprocessable entity"
     end
 
-    def raise_too_many_requests
-      ApiErrorHandler.handle_error('Too many requests', 'too_many_requests')
+    def raise_too_many_requests(response)
+      raise Obsidian::Errors::BaseError,
+            "#{response.status}: Too many requests"
     end
 
-    def raise_server_error
-      ApiErrorHandler.handle_error('Server error', 'server_error')
+    def raise_server_error(response)
+      raise Obsidian::Errors::BaseError,
+            "#{response.status}: Server error"
     end
   end
 end
