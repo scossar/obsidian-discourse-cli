@@ -36,7 +36,7 @@ module Obsidian
 
       def publish_dir(dir, publisher)
         directory = Directory.find_by(path: dir)
-        CLI::UI::Frame.open("Publishing {{green:#{dir}}}") do
+        CLI::UI::Frame.open("Publishing notes from {{green:#{dir}}}") do
           Dir.glob(File.join(dir, '*.md')).each do |file_path|
             spin_group = CLI::UI::SpinGroup.new
 
