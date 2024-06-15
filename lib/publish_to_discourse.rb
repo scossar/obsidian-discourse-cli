@@ -3,7 +3,6 @@
 require 'front_matter_parser'
 require 'yaml'
 
-require_relative 'api_error_handler'
 require_relative 'discourse_request'
 require_relative 'errors'
 require_relative 'file_handler'
@@ -20,12 +19,9 @@ module Obsidian
     end
 
     def publish(file_path:, directory:)
-      begin
-        title = FileUtils.title_from_file_path(file_path)
-      rescue ArgumentError => e
-        CliErrorHandler.handle_error(e.message, 'invalid_file')
-        return
-      end
+      title = FileUtils.title_from_file_path(file_path)
+      raise Obsidian::Errors::BaseError, "Title not found for file_path: #{file_path}" unless title
+
       content = File.read(file_path)
       note = Note.find_by(title:)
       post_id = note&.discourse_topic&.discourse_post_id
@@ -39,6 +35,8 @@ module Obsidian
       else
         create_topic(title:, markdown:, directory:)
       end
+    rescue StandardError => e
+      raise Obsidian::Errors::BaseError, "Error publishing note: #{e.message}"
     end
 
     def parse(content)
@@ -56,7 +54,11 @@ module Obsidian
     end
 
     def update_topic_from_note(markdown:, post_id:)
-      @client.update_post(markdown:, post_id:)
+      @client.update_post(markdown:, post_id:).tap do |response|
+        raise Obsidian::Errors::BaseError, "Failed to update post_id: #{post_id}" unless response
+      end
+    rescue StandardError => e
+      raise Obsidian::Errors::BaseError, "Failed to update topic for Note: #{e.message}"
     end
 
     private
@@ -72,7 +74,10 @@ module Obsidian
 
     def create_discourse_topic(title, markdown, category_id)
       @client.create_topic(title:, markdown:, category: category_id).tap do |response|
-        raise Obsidian::Errors::BaseError, 'Failed to create Discourse topic' unless response
+        unless response
+          raise Obsidian::Errors::BaseError,
+                "Failed to create Discourse topic: #{title}"
+        end
       end
     rescue StandardError => e
       raise Obsidian::Errors::BaseError, "Error creating Discourse topic: #{e.message}"
