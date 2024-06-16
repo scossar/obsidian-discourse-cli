@@ -17,7 +17,7 @@ module Obsidian
       end
 
       categories, category_names = nil
-      spin_group.add('Fetching Categories') do
+      spin_group.add('Categories') do
         category_fetcher = DiscourseCategoryFetcher.instance
         categories = category_fetcher.categories
         category_names = category_fetcher.category_names

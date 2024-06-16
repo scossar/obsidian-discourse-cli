@@ -52,7 +52,7 @@ module Obsidian
         end
       end
 
-      def publish_dir(dir, _publisher)
+      def publish_dir(dir, publisher)
         directory = Directory.find_by(path: dir)
         CLI::UI::Frame.open("Publishing notes from {{green:#{dir}}}") do
           Dir.glob(File.join(dir, '*.md')).each do |file_path|
@@ -63,7 +63,7 @@ module Obsidian
             end
 
             spin_group.add("Note {{green:#{File.basename(file_path)}}}") do
-              # publisher.publish(file_path:, directory:)
+              publisher.publish(file_path:, directory:)
             end
 
             spin_group.wait
