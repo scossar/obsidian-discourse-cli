@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'terminal-table'
+
 require_relative 'cli_kit_utils'
 require_relative 'models/discourse_category'
 require_relative 'models/directory'
@@ -22,9 +24,24 @@ module Obsidian
       end
 
       spin_group.wait
-      puts category_names if category_names
+      category_info(categories)
 
       [categories, category_names]
+    end
+
+    def self.category_info(categories)
+      rows = []
+
+      categories.each_value do |category|
+        name = CLI::UI.fmt "{{blue:#{category[:name]}}}"
+        read_restricted = category[:read_restricted]
+        description = category[:description_excerpt]
+        rows << [name, read_restricted, description]
+      end
+
+      table = Terminal::Table.new(headings: ['Name', 'Read Restricted', 'Description'], rows:)
+      table.style = { border: :unicode_round }
+      puts table
     end
 
     def self.directories_for_categories(categories:, category_names:, selected_dirs:)

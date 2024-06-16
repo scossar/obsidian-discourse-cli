@@ -15,6 +15,7 @@ gem 'pry'
 gem 'rake', '~> 13.0', '>= 13.0.6'
 gem 'sinatra-activerecord', '~> 2.0', '>= 2.0.27'
 gem 'sqlite3', '~> 1.4'
+gem 'terminal-table', '~> 3.0', '>= 3.0.1'
 gem 'yard'
 
 group :test do
