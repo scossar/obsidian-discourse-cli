@@ -40,7 +40,8 @@ module Obsidian
     end
 
     def self.display_dir_category(dir:, category:)
-      CLI::UI::Frame.open("{{green:#{dir}}}") do
+      basename = File.basename(dir)
+      CLI::UI::Frame.open("{{green:#{basename}}}") do
         puts CLI::UI.fmt "  {{green:#{dir}}} has already been configured to publish notes to " \
                          "{{blue:#{category.name}}}"
       end
