@@ -29,9 +29,9 @@ module Obsidian
 
     def self.directories_for_categories(categories:, category_names:, selected_dirs:)
       selected_dirs.each do |dir|
-        discourse_category = Directory.find_by(path: dir)&.discourse_category
-        if discourse_category
-          puts discourse_category.name
+        category = Directory.find_by(path: dir)&.discourse_category
+        if category
+          display_dir_category(dir:, category:)
         else
           category_name = select_category_for_dir(category_names:, dir:)
           update_directory(categories:, category_name:, dir:)
@@ -39,13 +39,25 @@ module Obsidian
       end
     end
 
-    def self.select_category_for_dir(category_names:, dir:)
-      loop do
-        answer = CLI::UI::Prompt.ask("Category for {{green:#{dir}}}?", options: category_names)
-        confirm = CLI::UI::Prompt.confirm("  Notes from the {{green:#{dir}}} directory will be " \
-                                          "published to the {{blue:#{answer}}} category.")
+    def self.display_dir_category(dir:, category:)
+      CLI::UI::Frame.open("{{green:#{dir}}}") do
+        puts CLI::UI.fmt "  {{green:#{dir}}} has already been configured to publish notes to " \
+                         "{{blue:#{category.name}}}"
+      end
+    end
 
-        return answer if confirm
+    def self.select_category_for_dir(category_names:, dir:)
+      category_name, confirm = nil
+      basename = File.basename(dir)
+      loop do
+        CLI::UI::Frame.open("Configuring {{green:#{basename}}}") do
+          category_name = CLI::UI::Prompt.ask("Category for {{green:#{dir}}}?",
+                                              options: category_names)
+          confirm = CLI::UI::Prompt.confirm("Notes from the {{green:#{dir}}} directory will be " \
+                                            "published to the {{blue:#{category_name}}} category.")
+        end
+
+        return category_name if confirm
       end
     end
 

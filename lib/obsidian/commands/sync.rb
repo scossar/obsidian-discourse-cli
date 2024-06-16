@@ -38,7 +38,7 @@ module Obsidian
           categories, category_names = CategoryUtils.category_loader
         end
         exit unless categories
-        CLI::UI::Frame.open('Select directories for categories') do
+        CLI::UI::Frame.open('Configure directory categories') do
           CategoryUtils.directories_for_categories(categories:, category_names:, selected_dirs:)
         end
       end
