@@ -22,7 +22,7 @@ module Obsidian
       @categories.each do |id, category|
         return id if category[:name] == name
       end
-      nil # Return nil if no category with the given name is found
+      nil
     end
 
     private
@@ -43,7 +43,8 @@ module Obsidian
           name: cat_hash['name'],
           slug: cat_hash['slug'],
           read_restricted: cat_hash['read_restricted'],
-          parent_category_id: cat_hash['parent_category_id']
+          parent_category_id: cat_hash['parent_category_id'],
+          description_excerpt: cat_hash['description_excerpt']
         }
       end
     end
