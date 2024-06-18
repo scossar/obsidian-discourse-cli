@@ -20,6 +20,7 @@ module Obsidian
       internal_links = []
       @markdown.gsub(@internal_link_regex) do |link_match|
         title = link_match.match(@internal_link_regex)[1]
+        internal_links << title
         discourse_url = Note.find_by(title:)&.discourse_topic&.discourse_url
         discourse_url ||= placeholder_topic(title)
         new_link = "[#{title}](#{discourse_url})"
