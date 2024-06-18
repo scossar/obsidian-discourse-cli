@@ -89,7 +89,7 @@ module Obsidian
               end
             else
               spin_group.add("Publishing topic for note {{green:#{title}}}") do
-                publisher.create_topic(title, markdown, directory)
+                publisher.create_topic(title, markdown)
               end
             end
 

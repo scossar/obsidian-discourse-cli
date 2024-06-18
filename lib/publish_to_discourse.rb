@@ -36,7 +36,7 @@ module Obsidian
     def create_topic(title, markdown)
       category_id = fetch_category_id
       response = create_discourse_topic(title, markdown, category_id)
-      note = create_note(title, @directory)
+      note = create_note(title)
       create_discourse_topic_entry(response, note)
     end
 
