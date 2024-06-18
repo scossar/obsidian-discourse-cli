@@ -84,18 +84,16 @@ module Obsidian
               puts CLI::UI.fmt "  #{exception}"
             end
 
-            upload_adjusted = nil
             spin_group.add("Handling uploads for {{green:#{title}}}") do |spinner|
-              upload_adjusted, file_names = publisher.handle_attachments(markdown)
+              markdown, file_names = publisher.handle_attachments(markdown)
               spinner_title = uploads_title(file_names, title)
               spinner.update_title(spinner_title)
             end
 
             spin_group.wait
 
-            link_adjusted = nil
             spin_group.add("Handling internal links for {{green:#{title}}}") do |spinner|
-              link_adjusted, stub_topics = publisher.handle_links(upload_adjusted, directory)
+              markdown, stub_topics = publisher.handle_links(markdown, directory)
               spinner_title = links_title(stub_topics, title)
               spinner.update_title(spinner_title)
             end
@@ -106,11 +104,11 @@ module Obsidian
 
             if post_id
               spin_group.add("Updating topic for note {{green:#{title}}}") do
-                publisher.update_post_from_note(link_adjusted, post_id)
+                publisher.update_post_from_note(markdown, post_id)
               end
             else
               spin_group.add("Publishing topic for note {{green:#{title}}}") do
-                publisher.create_topic(title, link_adjusted, directory)
+                publisher.create_topic(title, markdown, directory)
               end
             end
 
