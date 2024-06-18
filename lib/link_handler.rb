@@ -17,6 +17,7 @@ module Obsidian
     end
 
     def handle
+      internal_links = []
       @markdown.gsub(@internal_link_regex) do |link_match|
         title = link_match.match(@internal_link_regex)[1]
         discourse_url = Note.find_by(title:)&.discourse_topic&.discourse_url
@@ -27,6 +28,7 @@ module Obsidian
         raise Obsidian::Errors::BaseError,
               "Error converting interal link to relative link: #{e.message}"
       end
+      [@markdown, internal_links]
     end
 
     private

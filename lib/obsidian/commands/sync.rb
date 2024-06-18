@@ -74,6 +74,7 @@ module Obsidian
       end
 
       def publish_dir(dir, publisher)
+        directory = Directory.find_by(path: dir)
         CLI::UI::Frame.open("Publishing notes from {{green:#{dir}}} ") do
           Dir.glob(File.join(dir, '*.md')).each do |file_path|
             title, front_matter, markdown = FileUtils.parse_file(file_path)
@@ -83,9 +84,15 @@ module Obsidian
               puts CLI::UI.fmt "  #{exception}"
             end
 
-            spin_group.add("Handling uploads for {{green:#{@title}}}") do |spinner|
+            spin_group.add("Handling uploads for {{green:#{title}}}") do |spinner|
               markdown, file_names = publisher.handle_attachments(markdown)
               spinner_title = uploads_title(file_names, title)
+              spinner.update_title(spinner_title)
+            end
+
+            spin_group.add("Handling internal links for {{green:#{title}}}") do |spinner|
+              markdown, stub_topics = publisher.handle_links(markdown, directory)
+              spinner_title = links_title(stub_topics, title)
               spinner.update_title(spinner_title)
             end
 
@@ -102,6 +109,15 @@ module Obsidian
           "Uploaded #{file_names} for {{green:#{title}}}"
         else
           "No uploads in {{green:#{title}}}"
+        end
+      end
+
+      def links_title(stub_topics, title)
+        if stub_topics.any?
+          topic_names = stub_topics.map { |name| "{{green:#{name}}}" }.join(', ')
+          "Generated stub topics for #{topic_names}"
+        else
+          "No internal links in {{green:#{title}}}"
         end
       end
 

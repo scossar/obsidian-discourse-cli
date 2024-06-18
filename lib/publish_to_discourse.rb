@@ -45,6 +45,11 @@ module Obsidian
       file_handler.convert
     end
 
+    def handle_links(markdown, directory)
+      link_handler = LinkHandler.new(markdown, directory)
+      link_handler.handle
+    end
+
     def parse(content)
       parsed = FrontMatterParser::Parser.new(:md).call(content)
       front_matter = parsed.front_matter
