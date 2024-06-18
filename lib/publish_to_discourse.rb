@@ -62,14 +62,14 @@ module Obsidian
       [markdown, front_matter]
     end
 
-    def create_topic(title:, markdown:, directory:)
+    def create_topic(title, markdown, directory)
       category_id = fetch_category_id(directory)
       response = create_discourse_topic(title, markdown, category_id)
       note = create_note(title, directory)
       create_discourse_topic_entry(response, note)
     end
 
-    def update_post_from_note(markdown:, post_id:)
+    def update_post_from_note(markdown, post_id)
       @client.update_post(markdown:, post_id:).tap do |response|
         raise Obsidian::Errors::BaseError, "Failed to update post_id: #{post_id}" unless response
       end

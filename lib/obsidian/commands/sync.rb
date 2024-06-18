@@ -77,34 +77,40 @@ module Obsidian
         directory = Directory.find_by(path: dir)
         CLI::UI::Frame.open("Publishing notes from {{green:#{dir}}} ") do
           Dir.glob(File.join(dir, '*.md')).each do |file_path|
-            title, front_matter, markdown = FileUtils.parse_file(file_path)
+            title, _front_matter, markdown = FileUtils.parse_file(file_path)
             spin_group = CLI::UI::SpinGroup.new
 
             spin_group.failure_debrief do |_title, exception|
               puts CLI::UI.fmt "  #{exception}"
             end
 
+            upload_adjusted = nil
             spin_group.add("Handling uploads for {{green:#{title}}}") do |spinner|
-              markdown, file_names = publisher.handle_attachments(markdown)
+              upload_adjusted, file_names = publisher.handle_attachments(markdown)
               spinner_title = uploads_title(file_names, title)
               spinner.update_title(spinner_title)
             end
 
+            spin_group.wait
+
+            link_adjusted = nil
             spin_group.add("Handling internal links for {{green:#{title}}}") do |spinner|
-              markdown, stub_topics = publisher.handle_links(markdown, directory)
+              link_adjusted, stub_topics = publisher.handle_links(upload_adjusted, directory)
               spinner_title = links_title(stub_topics, title)
               spinner.update_title(spinner_title)
             end
+
+            spin_group.wait
 
             post_id = publisher.post_id_for_note(title)
 
             if post_id
               spin_group.add("Updating topic for note {{green:#{title}}}") do
-                publisher.update_post_from_note(markdown:, post_id:)
+                publisher.update_post_from_note(link_adjusted, post_id)
               end
             else
               spin_group.add("Publishing topic for note {{green:#{title}}}") do
-                publisher.create_topic(title:, markdown:, directory:)
+                publisher.create_topic(title, link_adjusted, directory)
               end
             end
 

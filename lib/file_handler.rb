@@ -16,7 +16,7 @@ module Obsidian
 
     def convert
       file_names = []
-      @markdown.gsub(@image_tag_regex) do |tag_match|
+      file_adjusted = @markdown.gsub(@image_tag_regex) do |tag_match|
         file_name = tag_match.match(@image_tag_regex)[1]
         file_names << file_name
         file_path = "#{@uploads_dir}/#{file_name}"
@@ -29,7 +29,7 @@ module Obsidian
         raise Obsidian::Errors::BaseError,
               "Error processing upload for #{tag_match}: #{e.message}"
       end
-      [@markdown, file_names]
+      [file_adjusted, file_names]
     end
 
     private
