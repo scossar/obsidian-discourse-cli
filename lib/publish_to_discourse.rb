@@ -1,12 +1,10 @@
 # frozen_string_literal: true
 
-require 'front_matter_parser'
 require 'yaml'
 
 require_relative 'discourse_request'
 require_relative 'errors'
 require_relative 'file_handler'
-require_relative 'file_utils'
 require_relative 'link_handler'
 require_relative 'models/discourse_topic'
 require_relative 'models/note'
@@ -17,27 +15,6 @@ module Obsidian
       @client = DiscourseRequest.new
       config = YAML.load_file('config/config.yml')
       @base_url = config['base_url']
-    end
-
-    def publish(file_path:, directory:)
-      title = FileUtils.title_from_file_path(file_path)
-      raise Obsidian::Errors::BaseError, "Title not found for file_path: #{file_path}" unless title
-
-      content = File.read(file_path)
-      note = Note.find_by(title:)
-      post_id = note&.discourse_topic&.discourse_post_id
-      markdown, _front_matter = parse(content)
-      file_handler = FileHandler.new(markdown)
-      markdown = file_handler.convert
-      link_handler = LinkHandler.new(markdown, directory)
-      markdown = link_handler.handle
-      if post_id
-        update_post_from_note(markdown:, post_id:)
-      else
-        create_topic(title:, markdown:, directory:)
-      end
-    rescue StandardError => e
-      raise Obsidian::Errors::BaseError, "Error publishing note: #{e.message}"
     end
 
     def handle_attachments(markdown)
@@ -53,13 +30,6 @@ module Obsidian
     def post_id_for_note(title)
       note = Note.find_by(title:)
       note&.discourse_topic&.discourse_post_id
-    end
-
-    def parse(content)
-      parsed = FrontMatterParser::Parser.new(:md).call(content)
-      front_matter = parsed.front_matter
-      markdown = parsed.content
-      [markdown, front_matter]
     end
 
     def create_topic(title, markdown, directory)
