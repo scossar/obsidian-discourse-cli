@@ -96,6 +96,18 @@ module Obsidian
               spinner.update_title(spinner_title)
             end
 
+            post_id = publisher.post_id_for_note(title)
+
+            if post_id
+              spin_group.add("Updating topic for note {{green:#{title}}}") do
+                publisher.update_post_from_note(markdown:, post_id:)
+              end
+            else
+              spin_group.add("Publishing topic for note {{green:#{title}}}") do
+                publisher.create_topic(title:, markdown:, directory:)
+              end
+            end
+
             spin_group.wait
           end
         end

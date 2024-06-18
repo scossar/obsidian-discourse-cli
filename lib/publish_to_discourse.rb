@@ -50,6 +50,11 @@ module Obsidian
       link_handler.handle
     end
 
+    def post_id_for_note(title)
+      note = Note.find_by(title:)
+      note&.discourse_topic&.discourse_post_id
+    end
+
     def parse(content)
       parsed = FrontMatterParser::Parser.new(:md).call(content)
       front_matter = parsed.front_matter
