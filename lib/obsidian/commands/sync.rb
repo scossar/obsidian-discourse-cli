@@ -3,9 +3,11 @@
 require 'obsidian'
 require_relative '../../models/directory'
 require_relative '../../category_utils'
+require_relative '../../cli_kit_utils'
 require_relative '../../directory_utils'
 require_relative '../../discourse_category_fetcher'
 require_relative '../../errors'
+require_relative '../../file_utils'
 require_relative '../../publish_to_discourse'
 
 module Obsidian
@@ -52,7 +54,7 @@ module Obsidian
         end
       end
 
-      def publish_dir(dir, publisher)
+      def publish_dir_bak(dir, publisher)
         directory = Directory.find_by(path: dir)
         CLI::UI::Frame.open("Publishing notes from {{green:#{dir}}}") do
           Dir.glob(File.join(dir, '*.md')).each do |file_path|
@@ -71,7 +73,37 @@ module Obsidian
         end
       end
 
+      def publish_dir(dir, publisher)
+        CLI::UI::Frame.open("Publishing notes from {{green:#{dir}}} ") do
+          Dir.glob(File.join(dir, '*.md')).each do |file_path|
+            title, front_matter, markdown = FileUtils.parse_file(file_path)
+            spin_group = CLI::UI::SpinGroup.new
+
+            spin_group.failure_debrief do |_title, exception|
+              puts CLI::UI.fmt "  #{exception}"
+            end
+
+            spin_group.add("Handling uploads for {{green:#{@title}}}") do |spinner|
+              markdown, file_names = publisher.handle_attachments(markdown)
+              spinner_title = uploads_title(file_names, title)
+              spinner.update_title(spinner_title)
+            end
+
+            spin_group.wait
+          end
+        end
+      end
+
       private
+
+      def uploads_title(file_names, title)
+        if file_names.any?
+          file_names = file_names.map { |name| "{{green:#{name}}}" }.join(', ')
+          "Uploaded #{file_names} for {{green:#{title}}}"
+        else
+          "No uploads in {{green:#{title}}}"
+        end
+      end
 
       def rescue_custom_error(error)
         CLI::UI::Frame.open('Custom Error') do

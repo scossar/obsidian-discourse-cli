@@ -40,11 +40,9 @@ module Obsidian
       raise Obsidian::Errors::BaseError, "Error publishing note: #{e.message}"
     end
 
-    def parse_file(file_path)
-      title = FileUtils.title_from_file_path(file_path)
-      content = File.read(file_path)
-      markdown, _front_matter = parse(content)
-      [title, markdown]
+    def handle_attachments(markdown)
+      file_handler = FileHandler.new(markdown)
+      file_handler.convert
     end
 
     def parse(content)

@@ -15,10 +15,12 @@ module Obsidian
     end
 
     def convert
+      file_names = []
       @markdown.gsub(@image_tag_regex) do |tag_match|
-        image_name = tag_match.match(@image_tag_regex)[1]
-        image_path = "#{@uploads_dir}/#{image_name}"
-        response = upload_image(image_path)
+        file_name = tag_match.match(@image_tag_regex)[1]
+        file_names << file_name
+        file_path = "#{@uploads_dir}/#{file_name}"
+        response = upload_image(file_path)
         short_url = response['short_url']
         original_filename = response['original_filename']
         new_tag = "![#{original_filename}](#{short_url})"
@@ -27,6 +29,7 @@ module Obsidian
         raise Obsidian::Errors::BaseError,
               "Error processing upload for #{tag_match}: #{e.message}"
       end
+      [@markdown, file_names]
     end
 
     private
