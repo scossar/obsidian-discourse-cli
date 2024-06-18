@@ -9,6 +9,7 @@ require_relative '../../discourse_category_fetcher'
 require_relative '../../errors'
 require_relative '../../file_utils'
 require_relative '../../publish_to_discourse'
+require_relative '../../publisher_utils'
 
 module Obsidian
   module Commands
@@ -48,9 +49,7 @@ module Obsidian
       def publishing_frames(selected_dirs)
         CLI::UI::Frame.open('Publish to Discourse') do
           selected_dirs.each do |dir|
-            directory = Directory.find_by(path: dir)
-            publisher = PublishToDiscourse.new(directory)
-            publish_dir(dir, publisher)
+            PublisherUtils.publish_dir(dir)
           end
         end
       end

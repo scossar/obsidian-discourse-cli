@@ -28,6 +28,7 @@ module Obsidian
       link_handler.handle
     end
 
+    # TODO: this can be removed
     def post_id_for_note(title)
       note = Note.find_by(title:)
       note&.discourse_topic&.discourse_post_id
