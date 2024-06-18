@@ -11,7 +11,8 @@ require_relative 'models/note'
 
 module Obsidian
   class PublishToDiscourse
-    def initialize
+    def initialize(directory)
+      @directory = directory
       @client = DiscourseRequest.new
       config = YAML.load_file('config/config.yml')
       @base_url = config['base_url']
@@ -22,8 +23,8 @@ module Obsidian
       file_handler.convert
     end
 
-    def handle_links(markdown, directory)
-      link_handler = LinkHandler.new(markdown, directory)
+    def handle_links(markdown)
+      link_handler = LinkHandler.new(markdown, @directory)
       link_handler.handle
     end
 
@@ -32,10 +33,10 @@ module Obsidian
       note&.discourse_topic&.discourse_post_id
     end
 
-    def create_topic(title, markdown, directory)
-      category_id = fetch_category_id(directory)
+    def create_topic(title, markdown)
+      category_id = fetch_category_id
       response = create_discourse_topic(title, markdown, category_id)
-      note = create_note(title, directory)
+      note = create_note(title, @directory)
       create_discourse_topic_entry(response, note)
     end
 
@@ -49,11 +50,11 @@ module Obsidian
 
     private
 
-    def fetch_category_id(directory)
-      directory.discourse_category&.discourse_id.tap do |category_id|
+    def fetch_category_id
+      @directory.discourse_category&.discourse_id.tap do |category_id|
         unless category_id
           raise Obsidian::Errors::BaseError,
-                "Category ID not found for directory #{directory.path}"
+                "Category ID not found for directory #{@directory.path}"
         end
       end
     end
@@ -69,8 +70,8 @@ module Obsidian
       raise Obsidian::Errors::BaseError, "Error creating Discourse topic: #{e.message}"
     end
 
-    def create_note(title, directory)
-      Note.create(title:, directory:).tap do |note|
+    def create_note(title)
+      Note.create(title:, directory: @directory).tap do |note|
         raise Obsidian::Errors::BaseError, 'Note could not be created' unless note.persisted?
       end
     rescue StandardError => e

@@ -46,35 +46,16 @@ module Obsidian
       end
 
       def publishing_frames(selected_dirs)
-        publisher = PublishToDiscourse.new
         CLI::UI::Frame.open('Publish to Discourse') do
           selected_dirs.each do |dir|
+            directory = Directory.find_by(path: dir)
+            publisher = PublishToDiscourse.new(directory)
             publish_dir(dir, publisher)
           end
         end
       end
 
-      def publish_dir_bak(dir, publisher)
-        directory = Directory.find_by(path: dir)
-        CLI::UI::Frame.open("Publishing notes from {{green:#{dir}}}") do
-          Dir.glob(File.join(dir, '*.md')).each do |file_path|
-            spin_group = CLI::UI::SpinGroup.new
-
-            spin_group.failure_debrief do |_title, exception|
-              puts CLI::UI.fmt "  #{exception}"
-            end
-
-            spin_group.add("Note {{green:#{File.basename(file_path)}}}") do
-              publisher.publish(file_path:, directory:)
-            end
-
-            spin_group.wait
-          end
-        end
-      end
-
       def publish_dir(dir, publisher)
-        directory = Directory.find_by(path: dir)
         CLI::UI::Frame.open("Publishing notes from {{green:#{dir}}} ") do
           Dir.glob(File.join(dir, '*.md')).each do |file_path|
             title, _front_matter, markdown = FileUtils.parse_file(file_path)
@@ -93,7 +74,7 @@ module Obsidian
             spin_group.wait
 
             spin_group.add("Handling internal links for {{green:#{title}}}") do |spinner|
-              markdown, stub_topics = publisher.handle_links(markdown, directory)
+              markdown, stub_topics = publisher.handle_links(markdown)
               spinner_title = links_title(stub_topics, title)
               spinner.update_title(spinner_title)
             end
